@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Your Rural Nursing Pathway</title>
+    <!--
+    CANVAS LMS USAGE:
+    1. Copy this entire HTML file
+    2. In Canvas, create/edit a Page, click the HTML Editor button (</>)
+    3. Paste the complete HTML and save
+    OR upload to Files and embed via the Canvas file link tool
+    
+    CUSTOMISATION:
+    - To change pathway URLs: Search for "EDIT LINK" comments below
+    - To modify colours: Update the CSS custom properties in :root
+    - To change copy: Edit the pathwayData object in the JavaScript section
+    -->
+    <style>
+        /* COLOUR PALETTE - Edit these to change branding */
+        :root {
+            --uon-black: #000000;
+            --uon-grey: #4A4A4A;
+            --uon-blue: #1E4B87;
+            --accent-gold: #FDB813;
+            --bg-light: #F5F5F5;
+            --white: #FFFFFF;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--uon-grey);
+            background-color: var(--bg-light);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px var(--shadow);
+            overflow: hidden;
+        }
+        
+        /* Header */
+        header {
+            background: var(--uon-blue);
+            color: var(--white);
+            padding: 30px 20px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        header p {
+            font-size: 1rem;
+            opacity: 0.95;
+        }
+        
+        /* Progress indicator */
+        .progress-bar {
+            background: var(--bg-light);
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--uon-grey);
+            border-bottom: 1px solid #E0E0E0;
+        }
+        
+        .progress-text {
+            font-weight: 500;
+        }
+        
+        /* Main content area */
+        .content {
+            padding: 30px 20px;
+            min-height: 300px;
+        }
+        
+        /* Question styling */
+        .question {
+            opacity: 0;
+            animation: fadeIn 0.4s ease forwards;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .question h2 {
+            color: var(--uon-black);
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        /* Button styling */
+        .btn {
+            background: var(--white);
+            border: 2px solid var(--uon-blue);
+            color: var(--uon-blue);
+            padding: 18px 24px;
+            font-size: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            font-weight: 500;
+            position: relative;
+            font-family: inherit;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            background: var(--uon-blue);
+            color: var(--white);
+            transform: translateX(5px);
+        }
+        
+        .btn:focus {
+            outline: 3px solid var(--accent-gold);
+            outline-offset: 2px;
+        }
+        
+        .btn::after {
+            content: '→';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+            opacity: 0.6;
+        }
+        
+        /* Navigation buttons */
+        .nav-buttons {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-secondary {
+            background: var(--bg-light);
+            border: 2px solid var(--uon-grey);
+            color: var(--uon-grey);
+            padding: 12px 20px;
+            font-size: 0.95rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            font-family: inherit;
+        }
+        
+        .btn-secondary:hover {
+            background: var(--uon-grey);
+            color: var(--white);
+        }
+        
+        .btn-secondary:focus {
+            outline: 3px solid var(--accent-gold);
+            outline-offset: 2px;
+        }
+        
+        /* Result styling */
+        .result {
+            opacity: 0;
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        .result-header {
+            background: linear-gradient(135deg, var(--uon-blue) 0%, #2a5a9e 100%);
+            color: var(--white);
+            padding: 25px;
+            border-radius: 6px;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .result-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        
+        .result-header h2 {
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .result-header .tagline {
+            font-size: 1.05rem;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .result-details {
+            background: var(--bg-light);
+            padding: 25px;
+            border-radius: 6px;
+            margin-bottom: 25px;
+        }
+        
+        .detail-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 18px;
+            gap: 15px;
+        }
+        
+        .detail-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .detail-icon {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            margin-top: 2px;
+        }
+        
+        .detail-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: var(--uon-blue);
+        }
+        
+        .detail-content {
+            flex: 1;
+        }
+        
+        .detail-content strong {
+            color: var(--uon-black);
+            font-weight: 600;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: var(--accent-gold);
+            color: var(--uon-black);
+            padding: 16px 32px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .cta-button:hover {
+            background: #e5a711;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(253, 184, 19, 0.3);
+        }
+        
+        .cta-button:focus {
+            outline: 3px solid var(--uon-blue);
+            outline-offset: 2px;
+        }
+        
+        /* Fallback message */
+        .fallback-message {
+            text-align: center;
+            padding: 40px 20px;
+            opacity: 0;
+            animation: fadeIn 0.4s ease forwards;
+        }
+        
+        .fallback-message p {
+            font-size: 1.2rem;
+            color: var(--uon-grey);
+            margin-bottom: 25px;
+        }
+        
+        /* Hidden state */
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Modal/Popup styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            opacity: 0;
+            animation: fadeIn 0.3s ease forwards;
+        }
+        
+        .modal {
+            background: var(--white);
+            border-radius: 8px;
+            max-width: 500px;
+            width: 100%;
+            padding: 30px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            position: relative;
+            transform: scale(0.9);
+            animation: modalSlideIn 0.3s ease forwards;
+        }
+        
+        @keyframes modalSlideIn {
+            to {
+                transform: scale(1);
+            }
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--uon-grey);
+            cursor: pointer;
+            padding: 5px 10px;
+            line-height: 1;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .modal-close:hover {
+            background: var(--bg-light);
+            color: var(--uon-black);
+        }
+        
+        .modal-close:focus {
+            outline: 3px solid var(--accent-gold);
+            outline-offset: 2px;
+        }
+        
+        .modal h3 {
+            color: var(--uon-blue);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .modal p {
+            color: var(--uon-grey);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .contact-info {
+            background: var(--bg-light);
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 25px;
+            border-left: 4px solid var(--uon-blue);
+        }
+        
+        .contact-info strong {
+            color: var(--uon-black);
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .contact-info a {
+            color: var(--uon-blue);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-modal {
+            flex: 1;
+            min-width: 140px;
+            padding: 14px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            text-align: center;
+            border: none;
+            font-family: inherit;
+        }
+        
+        .btn-modal-primary {
+            background: var(--accent-gold);
+            color: var(--uon-black);
+        }
+        
+        .btn-modal-primary:hover {
+            background: #e5a711;
+            transform: translateY(-2px);
+        }
+        
+        .btn-modal-secondary {
+            background: var(--uon-blue);
+            color: var(--white);
+        }
+        
+        .btn-modal-secondary:hover {
+            background: #2a5a9e;
+        }
+        
+        .btn-modal:focus {
+            outline: 3px solid var(--accent-gold);
+            outline-offset: 2px;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            
+            header {
+                padding: 20px 15px;
+            }
+            
+            header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .content {
+                padding: 20px 15px;
+            }
+            
+            .question h2 {
+                font-size: 1.2rem;
+            }
+            
+            .btn {
+                padding: 16px 20px;
+                font-size: 0.95rem;
+            }
+            
+            .result-header h2 {
+                font-size: 1.4rem;
+            }
+        }
+        
+        /* Reduced motion preference */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        /* Print styles */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                max-width: 100%;
+            }
+            
+            .progress-bar,
+            .nav-buttons,
+            .btn-secondary {
+                display: none !important;
+            }
+            
+            .result-header {
+                background: var(--uon-blue) !important;
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+            
+            .result-details {
+                border: 1px solid #ddd;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Find Your Rural Nursing Pathway</h1>
+            <p>Discover which rural study option best fits your lifestyle and learning goals.</p>
+        </header>
+        
+        <div class="progress-bar" id="progress">
+            <span class="progress-text">Step 1 of 3</span>
+        </div>
+        
+        <div class="content" id="content">
+            <!-- Questions and results will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <script>
+        // PATHWAY DATA - Edit text content here
+        const pathwayData = {
+            ruralCollaborative: {
+                name: "Rural Collaborative Program",
+                tagline: "Stay connected to your home campus while completing placements at Tamworth Hospital.",
+                details: [
+                    { label: "Study Mode", text: "Callaghan Campus / Central Coast Campus + Online", icon: "study" },
+                    { label: "Theory", text: "Combination of on-campus and online study", icon: "study" },
+                    { label: "Labs", text: "Completed through the program", icon: "lab" },
+                    { label: "Placements", text: "Tamworth Hospital (Years 2–3)", icon: "placement" },
+                    { label: "Accommodation", text: "Independent", icon: "accommodation" },
+                    { label: "Extras", text: "Placement coordination and rural experience support", icon: "community" }
+                ],
+                learnMoreUrl: "mailto:Jessica.billett@newcastle.edu.au?subject=Rural%20Collaborative%20Program%20Enquiry"
+            },
+            studyInPlace: {
+                name: "Study in Place",
+                tagline: "Study and complete practical learning in Tamworth while keeping online theory flexibility.",
+                details: [
+                    { label: "Study Mode", text: "Tamworth + Online", icon: "study" },
+                    { label: "Theory", text: "Online", icon: "study" },
+                    { label: "Labs", text: "Tamworth Education Centre", icon: "lab" },
+                    { label: "Placements", text: "Tamworth region", icon: "placement" },
+                    { label: "Accommodation", text: "Self-arranged", icon: "accommodation" },
+                    { label: "Extras", text: "Community engagement, academic mentoring, interprofessional learning", icon: "community" }
+                ],
+                learnMoreUrl: "mailto:Jessica.billett@newcastle.edu.au?subject=Study%20in%20Place%20Enquiry"
+            },
+            ruralImmersion: {
+                name: "Rural Immersion Program",
+                tagline: "Live locally in subsidised accommodation and immerse yourself in the Tamworth community.",
+                details: [
+                    { label: "Study Mode", text: "Tamworth + Online", icon: "study" },
+                    { label: "Theory", text: "Online", icon: "study" },
+                    { label: "Labs", text: "Tamworth Education Centre", icon: "lab" },
+                    { label: "Placements", text: "Tamworth region", icon: "placement" },
+                    { label: "Accommodation", text: "Subsidised rural accommodation", icon: "accommodation" },
+                    { label: "Extras", text: "Community engagement, academic mentoring, interprofessional learning", icon: "community" }
+                ],
+                learnMoreUrl: "mailto:Jessica.billett@newcastle.edu.au?subject=Rural%20Immersion%20Program%20Enquiry"
+            }
+        };
+        
+        // SVG Icons
+        const icons = {
+            study: '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/><path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>',
+            lab: '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7 2v11H3.83C3.12 14.17 3 15.83 3 17c0 2.76 2.24 5 5 5h8c2.76 0 5-2.24 5-5 0-1.17-.12-2.83-.83-4H17V2h-2v7h-2V2h-2v7h-2V2H7zm6 19c-1.66 0-3-1.34-3-3 0-.35.06-.69.17-1.02l1.3-3.98h3.05l1.3 3.98c.11.33.17.67.17 1.02 0 1.66-1.34 3-3 3z"/></svg>',
+            placement: '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l-5.5 9h11L12 2zm0 3.84L13.93 9h-3.87L12 5.84zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zm0 7c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5zM3 21.5h8v-8H3v8zm2-6h4v4H5v-4z"/></svg>',
+            accommodation: '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>',
+            community: '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>'
+        };
+        
+        // State management
+        let currentStep = 1;
+        let answers = {};
+        
+        // Questions
+        const questions = {
+            q1: {
+                text: "Are you interested in studying and gaining nursing experience in a rural community?",
+                options: [
+                    { text: "Yes", value: "yes", next: "q2" },
+                    { text: "No", value: "no", next: "fallback" }
+                ]
+            },
+            q2: {
+                text: "How do you prefer to complete your theory studies?",
+                options: [
+                    { text: "I want to stay primarily connected with my current campus (Callaghan or Central Coast)", value: "campus", next: "ruralCollaborative" },
+                    { text: "I want to complete my theory online", value: "online", next: "q3" }
+                ]
+            },
+            q3: {
+                text: "Do you want to live in subsidised rural accommodation while you study?",
+                options: [
+                    { text: "Yes", value: "yes", next: "ruralImmersion" },
+                    { text: "No", value: "no", next: "studyInPlace" }
+                ]
+            }
+        };
+        
+        // Initialize
+        function init() {
+            showQuestion('q1');
+        }
+        
+        // Show question
+        function showQuestion(questionId) {
+            const question = questions[questionId];
+            const content = document.getElementById('content');
+            
+            let html = `
+                <div class="question" role="region" aria-live="polite">
+                    <h2>${question.text}</h2>
+                    <div class="options" role="group" aria-label="Answer options">
+            `;
+            
+            question.options.forEach((option, index) => {
+                html += `
+                    <button class="btn" 
+                            onclick="handleAnswer('${questionId}', '${option.value}', '${option.next}')"
+                            aria-label="${option.text}">
+                        ${option.text}
+                    </button>
+                `;
+            });
+            
+            html += `
+                    </div>
+                    <div class="nav-buttons">
+            `;
+            
+            if (currentStep > 1) {
+                html += `<button class="btn-secondary" onclick="goBack()" aria-label="Go back to previous question">← Back</button>`;
+            }
+            
+            html += `
+                        <button class="btn-secondary" onclick="reset()" aria-label="Reset and start over">Reset</button>
+                    </div>
+                </div>
+            `;
+            
+            content.innerHTML = html;
+            
+            // Focus first button for accessibility
+            setTimeout(() => {
+                const firstButton = content.querySelector('.btn');
+                if (firstButton) firstButton.focus();
+            }, 100);
+        }
+        
+        // Handle answer
+        function handleAnswer(questionId, value, next) {
+            answers[questionId] = value;
+            
+            if (next === 'fallback') {
+                showFallback();
+            } else if (next.startsWith('q')) {
+                currentStep++;
+                updateProgress();
+                showQuestion(next);
+            } else {
+                showResult(next);
+            }
+        }
+        
+        // Show fallback message
+        function showFallback() {
+            const content = document.getElementById('content');
+            content.innerHTML = `
+                <div class="fallback-message" role="region" aria-live="polite">
+                    <p>You may prefer to continue in your current campus program.</p>
+                    <button class="cta-button" onclick="reset()">Try Again</button>
+                </div>
+            `;
+            document.getElementById('progress').classList.add('hidden');
+        }
+        
+        // Show result
+        function showResult(pathwayKey) {
+            const pathway = pathwayData[pathwayKey];
+            const content = document.getElementById('content');
+            
+            let html = `
+                <div class="result" role="region" aria-live="polite">
+                    <div class="result-header">
+                        <h2>${pathway.name}</h2>
+                        <p class="tagline">${pathway.tagline}</p>
+                    </div>
+                    <div class="result-details" role="list" aria-label="Pathway details">
+            `;
+            
+            pathway.details.forEach(detail => {
+                html += `
+                    <div class="detail-item" role="listitem">
+                        <div class="detail-icon" aria-hidden="true">
+                            ${icons[detail.icon]}
+                        </div>
+                        <div class="detail-content">
+                            <strong>${detail.label}:</strong> ${detail.text}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                    <div style="text-align: center;">
+                        <button class="cta-button" onclick="showContactModal('${pathway.name}')" aria-label="Get more information about ${pathway.name}">
+                            Next Steps / Learn More
+                        </button>
+                    </div>
+                    <div class="nav-buttons">
+                        <button class="btn-secondary" onclick="reset()">Start Over</button>
+                    </div>
+                </div>
+            `;
+            
+            content.innerHTML = html;
+            document.getElementById('progress').classList.add('hidden');
+        }
+        
+        // Go back
+        function goBack() {
+            currentStep--;
+            updateProgress();
+            
+            // Determine which question to show based on answers
+            if (currentStep === 1) {
+                showQuestion('q1');
+            } else if (currentStep === 2) {
+                showQuestion('q2');
+            }
+        }
+        
+        // Reset
+        function reset() {
+            currentStep = 1;
+            answers = {};
+            document.getElementById('progress').classList.remove('hidden');
+            updateProgress();
+            showQuestion('q1');
+        }
+        
+        // Update progress
+        function updateProgress() {
+            document.getElementById('progress').innerHTML = `
+                <span class="progress-text">Step ${currentStep} of 3</span>
+            `;
+        }
+        
+        // Show contact modal
+        function showContactModal(pathwayName) {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.id = 'contactModal';
+            modal.innerHTML = `
+                <div class="modal" role="dialog" aria-labelledby="modalTitle" aria-modal="true">
+                    <button class="modal-close" onclick="closeContactModal()" aria-label="Close dialog">×</button>
+                    <h3 id="modalTitle">Next Steps</h3>
+                    <p>Ready to learn more about the ${pathwayName}? Get in touch with our coordinator or visit our website for detailed information.</p>
+                    
+                    <div class="contact-info">
+                        <strong>Program Coordinator</strong>
+                        Jessica Billett<br>
+                        <a href="mailto:Jessica.billett@newcastle.edu.au">Jessica.billett@newcastle.edu.au</a>
+                    </div>
+                    
+                    <div class="modal-buttons">
+                        <a href="mailto:Jessica.billett@newcastle.edu.au?subject=${encodeURIComponent(pathwayName + ' Enquiry')}" 
+                           class="btn-modal btn-modal-primary"
+                           aria-label="Email Jessica Billett">
+                            📧 Email Jessica
+                        </a>
+                        <a href="https://www.newcastle.edu.au/college/health-medicine-wellbeing/department-of-rural-health/placement-information/disciplines/nursing" 
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="btn-modal btn-modal-secondary"
+                           aria-label="Visit UON Department of Rural Health nursing page (opens in new tab)">
+                            🌐 Visit Website
+                        </a>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Focus the close button for accessibility
+            setTimeout(() => {
+                modal.querySelector('.modal-close').focus();
+            }, 100);
+            
+            // Close on overlay click
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeContactModal();
+                }
+            });
+            
+            // Close on Escape key
+            document.addEventListener('keydown', handleModalEscape);
+        }
+        
+        // Close contact modal
+        function closeContactModal() {
+            const modal = document.getElementById('contactModal');
+            if (modal) {
+                modal.remove();
+                document.removeEventListener('keydown', handleModalEscape);
+            }
+        }
+        
+        // Handle escape key for modal
+        function handleModalEscape(e) {
+            if (e.key === 'Escape') {
+                closeContactModal();
+            }
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                if (e.target.classList.contains('btn') || 
+                    e.target.classList.contains('btn-secondary') || 
+                    e.target.classList.contains('cta-button')) {
+                    e.preventDefault();
+                    e.target.click();
+                }
+            }
+        });
+        
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>
